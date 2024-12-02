@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Survey - {{ survey.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .survey-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .survey-container h2 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        form p {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .option {
+            margin-bottom: 10px;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="survey-container">
+        <h2>Survey: {{ survey.name }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% for question in survey.question_set.all %}
+                <p>{{ question.text }}</p>
+                {% if question.question_type == 'radio' %}
+                    {% for option in question.option_set.all %}
+                        <div class="option">
+                            <input type="radio" name="question_{{ question.id }}" value="{{ option.id }}" required>
+                            <label>{{ option.text }}</label>
+                        </div>
+                    {% endfor %}
+                {% elif question.question_type == 'checkbox' %}
+                    {% for option in question.option_set.all %}
+                        <div class="option">
+                            <input type="checkbox" name="question_{{ question.id }}" value="{{ option.id }}">
+                            <label>{{ option.text }}</label>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Survey</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            color: #444;
+        }
+
+        form {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        form p {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: none;
+            height: 80px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .question {
+            margin-bottom: 20px;
+        }
+
+        .question hr {
+            border: 1px solid #e0e0e0;
+        }
+
+        .options {
+            margin-top: 10px;
+        }
+
+        .options input[type="text"] {
+            width: calc(100% - 90px);
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .options button.add-option {
+            background-color: #28a745;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        .options button.delete-option {
+            background-color: #dc3545;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        #questions {
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script>
+        let questionCount = 0;
+
+        // Function to add a new question dynamically
+        function addQuestion() {
+            questionCount++;
+            const questionsDiv = document.getElementById('questions');
+
+            const questionDiv = document.createElement('div');
+            questionDiv.setAttribute('class', 'question');
+            questionDiv.setAttribute('id', 'question_' + questionCount);
+
+            // Question Text
+            const questionLabel = document.createElement('label');
+            questionLabel.innerText = 'Question ' + questionCount + ' Text:';
+            questionDiv.appendChild(questionLabel);
+
+            const questionInput = document.createElement('input');
+            questionInput.setAttribute('type', 'text');
+            questionInput.setAttribute('name', 'question_text_' + questionCount);
+            questionInput.required = true;
+            questionDiv.appendChild(questionInput);
+
+            // Question Type
+            const typeLabel = document.createElement('label');
+            typeLabel.innerText = ' Question Type:';
+            questionDiv.appendChild(typeLabel);
+
+            const typeSelect = document.createElement('select');
+            typeSelect.setAttribute('name', 'question_type_' + questionCount);
+
+            const optionRadio = document.createElement('option');
+            optionRadio.value = 'radio';
+            optionRadio.text = 'Single Choice (Radio Buttons)';
+            typeSelect.appendChild(optionRadio);
+
+            const optionCheckbox = document.createElement('option');
+            optionCheckbox.value = 'checkbox';
+            optionCheckbox.text = 'Multiple Choice (Checkboxes)';
+            typeSelect.appendChild(optionCheckbox);
+
+            questionDiv.appendChild(typeSelect);
+
+            // Options Section
+            const optionsDiv = document.createElement('div');
+            optionsDiv.setAttribute('class', 'options');
+            optionsDiv.setAttribute('id', 'options_' + questionCount);
+
+            const addOptionButton = document.createElement('button');
+            addOptionButton.setAttribute('type', 'button');
+            addOptionButton.setAttribute('class', 'add-option');
+            addOptionButton.setAttribute('onclick', `addOption(${questionCount})`);
+            addOptionButton.innerText = 'Add Option';
+            optionsDiv.appendChild(addOptionButton);
+
+            questionDiv.appendChild(optionsDiv);
+
+            // Append the questionDiv to the main questionsDiv
+            questionsDiv.appendChild(questionDiv);
+            questionsDiv.appendChild(document.createElement('hr'));
+        }
+
+        // Function to add a new option to a specific question
+        function addOption(questionId) {
+            const optionsDiv = document.getElementById('options_' + questionId);
+            const optionCount = optionsDiv.querySelectorAll('input').length + 1;
+
+            const optionInput = document.createElement('input');
+            optionInput.setAttribute('type', 'text');
+            optionInput.setAttribute('name', `question_${questionId}_option_${optionCount}`);
+            optionInput.placeholder = `Option ${optionCount}`;
+            optionInput.required = true;
+
+            const deleteOptionButton = document.createElement('button');
+            deleteOptionButton.setAttribute('type', 'button');
+            deleteOptionButton.setAttribute('class', 'delete-option');
+            deleteOptionButton.setAttribute('onclick', 'deleteOption(this)');
+            deleteOptionButton.innerText = 'Delete';
+
+            const optionDiv = document.createElement('div');
+            optionDiv.setAttribute('class', 'option');
+            optionDiv.appendChild(optionInput);
+            optionDiv.appendChild(deleteOptionButton);
+
+            optionsDiv.insertBefore(optionDiv, optionsDiv.querySelector('.add-option'));
+        }
+
+        // Function to delete an option dynamically
+        function deleteOption(button) {
+            const optionDiv = button.parentNode;
+            optionDiv.remove();
+        }
+    </script>
+</head>
+<body>
+    <h2>Create New Survey</h2>
+    <form method="post">
+        {% csrf_token %}
+        <p>
+            <label for="name">Survey Name:</label>
+            <input type="text" name="name" required id="name" placeholder="Enter survey name">
+        </p>
+        <p>
+            <label for="description">Description:</label>
+            <textarea name="description" required id="description" placeholder="Describe your survey..."></textarea>
+        </p>
+        <h3>Questions</h3>
+        <div id="questions">
+            <!-- Questions will be dynamically added here -->
+        </div>
+        <button type="button" onclick="addQuestion()">Add Question</button>
+        <br><br>
+        <p class="checkbox-label">
+            <input type="checkbox" name="publish" id="publish" value="yes">
+            <label for="publish">Publish Survey Immediately</label>
+        </p>
+        <button type="submit">Create Survey</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        .question {
+            margin-bottom: 20px;
+        }
+
+        .question h3 {
+            margin: 0;
+            color: #555;
+        }
+
+        .options {
+            list-style: none;
+            padding: 0;
+        }
+
+        .options li {
+            padding: 10px;
+            margin-bottom: 5px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .your-selection {
+            color: green;
+            font-weight: bold;
+        }
+
+        .percentage {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Results for Survey: {{ survey.name }}</h2>
+        <p><strong>Total Responses:</strong> {{ total_responses }}</p>
+
+        {% for question in question_stats %}
+            <div class="question">
+                <h3>{{ question.question_text }}</h3>
+                <ul class="options">
+                    {% for option in question.option_stats %}
+                        <li>
+                            <span>{{ option.option_text }}</span>
+                            {% if option.user_selected %}
+                                <span class="your-selection">(Your Selection)</span>
+                            {% endif %}
+                            <span class="percentage">- {{ option.total_count }} votes ({{ option.percentage|floatformat:2 }}%)</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

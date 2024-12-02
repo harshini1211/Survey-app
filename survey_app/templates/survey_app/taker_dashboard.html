@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Taker Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            margin: 0;
+        }
+
+        header a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+            border: 1px solid #fff;
+            border-radius: 5px;
+        }
+
+        header a:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        main h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        ul li a {
+            background-color: #28a745;
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        ul li a:hover {
+            background-color: #218838;
+        }
+
+        .empty-message {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Welcome, {{ request.user.username }}!</h2>
+        <a href="{% url 'logout' %}">Logout</a>
+    </header>
+    <main>
+        <!-- Available Surveys -->
+        <h3>Available Surveys</h3>
+        <ul>
+            {% for survey in available_surveys %}
+                <li>
+                    <!-- Display survey name, ID, state, and published date for debugging -->
+                    <span>
+                        {{ survey.name }} (ID: {{ survey.id }}, State: {{ survey.state }}, Published Date: {{ survey.published_date|date:"Y-m-d H:i:s" }})
+                    </span>
+                    <a href="{% url 'take_survey' survey.id %}">Take Survey</a>
+                </li>
+            {% empty %}
+                <div class="empty-message">
+                    <p>No surveys available at the moment.</p>
+                </div>
+            {% endfor %}
+        </ul>
+
+        <!-- Completed Surveys -->
+        <h3>Completed Surveys</h3>
+        <ul>
+            {% for survey in completed_surveys %}
+                <li>
+                    <span>
+                        {{ survey.name }}
+                    </span>
+                    <a href="{% url 'view_survey_results' survey.id %}">View Results</a>
+                </li>
+            {% empty %}
+                <div class="empty-message">
+                    <p>You have not completed any surveys yet.</p>
+                </div>
+            {% endfor %}
+        </ul>
+    </main>
+</body>
+</html>

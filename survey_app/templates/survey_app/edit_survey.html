@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head Content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Survey - {{ survey.name }}</title>
+    <style>
+        /* Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+        }
+
+        header h2 {
+            margin: 0;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button.delete {
+            background-color: #dc3545;
+        }
+
+        button.delete:hover {
+            background-color: #c82333;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            background: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .no-questions {
+            text-align: center;
+            color: #666;
+        }
+
+        .options input {
+            margin-bottom: 5px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .option-item button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .option-item button:hover {
+            background-color: #c82333;
+        }
+    </style>
+    <script>
+        // Function to dynamically add options for a question
+        function addOption(button) {
+            const optionsDiv = button.parentNode;
+            const optionItems = optionsDiv.querySelectorAll('.option-item');
+            const optionCount = optionItems.length + 1;
+
+            const newOption = document.createElement('div');
+            newOption.classList.add('option-item');
+            newOption.innerHTML = `
+                <input type="text" name="new_option_${Date.now()}" placeholder="Option ${optionCount}" required>
+                <button type="button" onclick="removeOption(this)">Delete</button>
+            `;
+            optionsDiv.insertBefore(newOption, button);
+        }
+
+        // Function to remove an option dynamically
+        function removeOption(button) {
+            const optionDiv = button.parentNode;
+            optionDiv.remove();
+        }
+
+        // Function to dynamically add a new question
+        function addNewQuestion() {
+            const questionList = document.getElementById('questions');
+            const questionCount = document.querySelectorAll('.question').length + 1;
+
+            const newQuestion = document.createElement('li');
+            newQuestion.classList.add('question');
+            newQuestion.innerHTML = `
+                <form method="post" action="{% url 'edit_survey' survey.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_question">
+                    <p>
+                        <label>Question Text:</label>
+                        <input type="text" name="new_question_text" placeholder="Enter question text" required>
+                    </p>
+                    <p>
+                        <label>Question Type:</label>
+                        <select name="new_question_type">
+                            <option value="radio">Single Choice (Radio Buttons)</option>
+                            <option value="checkbox">Multiple Choice (Checkboxes)</option>
+                        </select>
+                    </p>
+                    <div class="options">
+                        <label>Options:</label>
+                        <div class="option-item">
+                            <input type="text" name="new_option_${Date.now()}" placeholder="Option 1" required>
+                        </div>
+                        <button type="button" onclick="addOption(this)">Add Option</button>
+                    </div>
+                    <div class="question-actions">
+                        <button type="submit">Save Question</button>
+                        <button type="button" class="delete" onclick="removeQuestion(this)">Delete Question</button>
+                    </div>
+                </form>
+            `;
+            questionList.appendChild(newQuestion);
+        }
+
+        // Function to remove a new question before saving
+        function removeQuestion(button) {
+            const questionItem = button.closest('li.question');
+            questionItem.remove();
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h2>Edit Survey: {{ survey.name }}</h2>
+    </header>
+    <main>
+        <!-- Form to Publish Survey -->
+        <form action="{% url 'publish_survey' survey.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Publish Survey</button>
+        </form>
+
+        <!-- List of Existing Questions -->
+        <h3>Existing Questions</h3>
+        <ul id="questions">
+            {% for question in questions %}
+                <li class="question">
+                    <form method="post" action="{% url 'edit_survey' survey.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="question_id" value="{{ question.id }}">
+                        <p>
+                            <label>Question Text:</label>
+                            <input type="text" name="question_text" value="{{ question.text }}" required>
+                        </p>
+                        <p>
+                            <label>Question Type:</label>
+                            <select name="question_type">
+                                <option value="radio" {% if question.question_type == 'radio' %}selected{% endif %}>Single Choice</option>
+                                <option value="checkbox" {% if question.question_type == 'checkbox' %}selected{% endif %}>Multiple Choice</option>
+                            </select>
+                        </p>
+                        <div class="options">
+                            <label>Options:</label>
+                            {% for option in question.option_set.all %}
+                                <div class="option-item">
+                                    <input type="text" name="option_{{ option.id }}" value="{{ option.text }}" required>
+                                    <!-- Changed the delete button to a button that removes the option without submitting the form -->
+                                    <button type="button" class="delete" onclick="deleteOption(this, '{{ option.id }}')">Delete</button>
+                                </div>
+                            {% endfor %}
+                            <button type="button" onclick="addOption(this)">Add Option</button>
+                        </div>
+
+                        <div class="question-actions">
+                            <button type="submit" name="action" value="save_changes">Save Changes</button>
+                            <button type="submit" name="action" value="delete_question" class="delete">Delete Question</button>
+                        </div>
+                    </form>
+                </li>
+            {% empty %}
+                <p class="no-questions">No questions added yet.</p>
+            {% endfor %}
+        </ul>
+
+        <!-- Button to Add New Question -->
+        <button type="button" onclick="addNewQuestion()">Add New Question</button>
+
+        <!-- Finish Editing Button -->
+        <form action="{% url 'creator_dashboard' %}" method="get">
+            <button type="submit">Finish Editing</button>
+        </form>
+    </main>
+
+    <!-- Add a script to handle deleting options without redirecting -->
+    <script>
+        function deleteOption(button, optionId) {
+            // Remove the option element from the DOM
+            const optionDiv = button.parentNode;
+            optionDiv.remove();
+
+            // Create a hidden input to indicate that this option should be deleted
+            const form = button.closest('form');
+            const deleteInput = document.createElement('input');
+            deleteInput.type = 'hidden';
+            deleteInput.name = 'options_to_delete';
+            deleteInput.value = optionId;
+            form.appendChild(deleteInput);
+        }
+    </script>
+</body>
+</html>
