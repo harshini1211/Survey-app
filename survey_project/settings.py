@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'surveypj',       # Name of your database in pgAdmin
         'USER': 'postgres',                   # Username (in this case, "postgres")
-        'PASSWORD': 'Harshini@123',             # Your password for "postgres"
+        'PASSWORD': 'password',             # Your password for "postgres"
         'HOST': 'localhost',
         'PORT': '5432',                       # Default PostgreSQL port
     }
